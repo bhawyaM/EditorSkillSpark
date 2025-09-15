@@ -1,4 +1,5 @@
 import './App.css'
+import Editor from './Components/Editor';
 import { 
   Home, 
   Menu,
@@ -126,11 +127,8 @@ function App() {
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 p-8">
-        <div className="max-w-4xl">
+      <Editor />
 
-        </div>
-      </div>
     </div>
   );
 }
