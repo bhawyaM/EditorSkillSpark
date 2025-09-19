@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState, type Dispatch, type JSX, type SetStateAction } from "react";
-import { Trash2, Palette, Code, Paintbrush } from "lucide-react";
+import { Trash2, Palette, Code, Paintbrush, Save } from "lucide-react";
 import { IconImport } from "../../Components/IconImport";
 import useDragable from "../../Hooks/useDragable";
 import { useClickOutside } from "../../Hooks/useClickOutside";
+
 interface Point {
   x: number;
   y: number;
@@ -15,10 +16,21 @@ interface SVGElement {
   strokeWidth: number;
   fillColor?: string;
 }
+
+interface SavedSVG {
+  id: string;
+  content: string;
+  timestamp: Date;
+  elements: SVGElement[];
+}
+
 type MyProps = {
   setAddLine: React.Dispatch<React.SetStateAction<boolean>>;
+  savedSVGs: SavedSVG[];
+  setSavedSVGs: React.Dispatch<React.SetStateAction<SavedSVG[]>>;
 };
-export default function AddLine({ setAddLine }: MyProps) {
+
+export default function AddLine({ setAddLine, savedSVGs, setSavedSVGs }: MyProps) {
   const [points, setPoints] = useState<Point[]>([]);
   const [svgElements, setSvgElements] = useState<SVGElement[]>([]);
   const [showStyleEditor, setShowStyleEditor] = useState(false);
@@ -32,27 +44,12 @@ export default function AddLine({ setAddLine }: MyProps) {
   const [defaultStrokeWidth, setDefaultStrokeWidth] = useState(3);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const handleToolBox = useDragable();
-  const generateSvgElements = (currentPoints: Point[]): SVGElement[] => {
+
+  // Generate only the actual drawing elements (no helper dots)
+  const generateDrawingElements = (currentPoints: Point[]): SVGElement[] => {
     const elements: SVGElement[] = [];
 
-    // Add points as circles
-    currentPoints.forEach((point, index) => {
-      const color =
-        index === 0
-          ? "green"
-          : index === currentPoints.length - 1
-          ? "red"
-          : "orange";
-      elements.push({
-        type: "circle",
-        points: [point],
-        color,
-        strokeWidth: 2,
-        fillColor: color,
-      });
-    });
-
-    // Add lines/curves based on point count
+    // Only add lines/curves based on point count - NO CIRCLES/DOTS
     if (currentPoints.length === 2) {
       elements.push({
         type: "line",
@@ -79,19 +76,36 @@ export default function AddLine({ setAddLine }: MyProps) {
     return elements;
   };
 
+  // Generate helper dots for visual feedback (not saved)
+  const generateHelperDots = (currentPoints: Point[]): SVGElement[] => {
+    return currentPoints.map((point, index) => {
+      const color =
+        index === 0
+          ? "green"
+          : index === currentPoints.length - 1
+          ? "red"
+          : "orange";
+      return {
+        type: "circle" as const,
+        points: [point],
+        color,
+        strokeWidth: 2,
+        fillColor: color,
+      };
+    });
+  };
+
+  useEffect(() => {
+    console.log(svgContent);
+    return () => {};
+  }, []);
+
+  // Generate SVG content string from drawing elements only (no dots)
   const generateSvgContentString = (elements: SVGElement[]): string => {
     let content = "";
 
     elements.forEach((element, index) => {
       switch (element.type) {
-        case "circle":
-          content += `<circle cx="${element.points[0].x}" cy="${
-            element.points[0].y
-          }" r="4" fill="${
-            element.fillColor || element.color
-          }" stroke="white" stroke-width="${element.strokeWidth}"/>\n`;
-          break;
-
         case "line":
           content += `<line x1="${element.points[0].x}" y1="${element.points[0].y}" x2="${element.points[1].x}" y2="${element.points[1].y}" stroke="${element.color}" stroke-width="${element.strokeWidth}"/>\n`;
           break;
@@ -102,6 +116,11 @@ export default function AddLine({ setAddLine }: MyProps) {
 
         case "cubic":
           content += `<path d="M ${element.points[0].x} ${element.points[0].y} C ${element.points[1].x} ${element.points[1].y}, ${element.points[2].x} ${element.points[2].y}, ${element.points[3].x} ${element.points[3].y}" stroke="${element.color}" stroke-width="${element.strokeWidth}" fill="transparent"/>\n`;
+          break;
+
+        // Intentionally omit circles from saved content
+        case "circle":
+          // Don't add circles to saved content
           break;
       }
     });
@@ -125,22 +144,23 @@ export default function AddLine({ setAddLine }: MyProps) {
 
   useClickOutside({
     ref: containerRef,
-    enabled: showStyleEditor, 
+    enabled: showStyleEditor,
     bubbling: false,
     onClickOutside: () => {
       setShowStyleEditor(false);
       setActiveEditorBtn(null);
-      setAddLine(false)
+      setAddLine(false);
       console.log("clicked outside");
     },
   });
 
   useEffect(() => {
-    const newSvgElements = generateSvgElements(points);
-    setSvgElements(newSvgElements);
+    // Generate only the drawing elements for saving
+    const drawingElements = generateDrawingElements(points);
+    setSvgElements(drawingElements);
 
-    // Update SVG content string
-    const newSvgContent = generateSvgContentString(newSvgElements);
+    // Update SVG content string (without dots)
+    const newSvgContent = generateSvgContentString(drawingElements);
     setSvgContent(newSvgContent);
   }, [points, defaultStrokeColor, defaultStrokeWidth]);
 
@@ -148,9 +168,28 @@ export default function AddLine({ setAddLine }: MyProps) {
     setPoints([]);
   };
 
+  // Save current SVG function
+  const saveSVG = () => {
+    if (svgElements.length === 0) {
+      console.log("No SVG content to save");
+      return;
+    }
+
+    const newSavedSVG: SavedSVG = {
+      id: `svg_${Date.now()}`,
+      content: svgContent,
+      timestamp: new Date(),
+      elements: [...svgElements]
+    };
+
+    setSavedSVGs(prev => [...prev, newSavedSVG]);
+    console.log("SVG saved:", newSavedSVG);
+    console.log("All saved SVGs:", [...savedSVGs, newSavedSVG]);
+  };
+
   const renderSvgElement = (
     element: SVGElement,
-    index: number
+    index: number | string
   ): JSX.Element | null => {
     const key = `${element.type}-${index}`;
 
@@ -169,6 +208,7 @@ export default function AddLine({ setAddLine }: MyProps) {
         );
 
       case "line":
+        console.log("Rendering line:", element);
         return (
           <line
             key={key}
@@ -211,12 +251,13 @@ export default function AddLine({ setAddLine }: MyProps) {
   const editorBox = [
     { icon: "Trash2", hoverText: "Clear Points", function: "clear" },
     { icon: "paint-bucket", hoverText: "Style Editor", function: "style" },
-    { icon: "x", hoverText: "Style Editor", function: "cancel" },
+    { icon: "Save", hoverText: "Save SVG", function: "save" },
+    { icon: "x", hoverText: "Close", function: "cancel" },
   ];
 
   const handleButtonClick = (idx: number, func: string, e: any) => {
     e.stopPropagation();
-    
+
     setActiveEditorBtn(activeEditorBtn === idx ? null : idx);
 
     if (idx === 0) clearPoints();
@@ -225,11 +266,16 @@ export default function AddLine({ setAddLine }: MyProps) {
       if (showLexicalEditor) setShowLexicalEditor(false);
     }
     if (idx === 2) {
+      saveSVG();
+      // Reset active button after save
+      setTimeout(() => setActiveEditorBtn(null), 500);
+    }
+    if (idx === 3) {
       setShowLexicalEditor(!showLexicalEditor);
       if (showStyleEditor) setShowStyleEditor(false);
     }
-    if(func === "cancel"){
-      setAddLine(false)
+    if (func === "cancel") {
+      setAddLine(false);
     }
   };
 
@@ -457,11 +503,20 @@ export default function AddLine({ setAddLine }: MyProps) {
           onClick={handleClick}
           className=""
         >
-          {showLexicalEditor
-            ? renderSvgFromString(svgContent)
-            : svgElements.map((element, index) =>
+          {showLexicalEditor ? (
+            renderSvgFromString(svgContent)
+          ) : (
+            <>
+              {/* Render the actual drawing elements */}
+              {svgElements.map((element, index) =>
                 renderSvgElement(element, index)
               )}
+              {/* Render helper dots separately (only for visual feedback) */}
+              {generateHelperDots(points).map((dot, index) =>
+                renderSvgElement(dot, `dot-${index}`)
+              )}
+            </>
+          )}
         </svg>
       </div>
     </div>

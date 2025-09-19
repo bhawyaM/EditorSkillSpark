@@ -90,10 +90,10 @@ type ImageElement = {
   id: string | number;
   type: "image";
   src: string;
-  x: number;
+  x: number ;
   y: number;
-  width: number;
-  height: number;
+  width: number | string;
+  height: number | string;
   opacity?: number;
   filter?: string;
   borderRadius?: number | string;
