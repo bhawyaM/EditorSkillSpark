@@ -43,7 +43,7 @@ export default function IconGridInterface({
   const [searchTerm, setSearchTerm] = useState("");
   const [isVisible, setIsVisible] = useState(false);
   const [visibilityPercentage, setVisibilityPercentage] = useState(0);
-  const containerRef = useRef<HTMLDivElement | null>(null);
+
 
   const icons = [
     { icon: Home, name: "Home" },
@@ -99,20 +99,9 @@ export default function IconGridInterface({
   //     document.removeEventListener("click", handleClickOutside);
   //   };
   // }, []);
-    useClickOutside({
-    ref: containerRef,
-    enabled: iconBox, 
-    bubbling: true,
-    onClickOutside: () => {
-      setIconBox(false);
-    
-      setActiveEditorBtn(null);
-    },
-  });
 
   return (
     <div
-      ref={containerRef}
       className={`max-w-md w-full mx-auto border border-gray-800 rounded-lg shadow-lg
               backdrop-blur-lg backdrop-saturate-150 bg-white/40
               transition-all duration-300 ${

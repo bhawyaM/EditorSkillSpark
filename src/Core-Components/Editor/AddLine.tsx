@@ -26,11 +26,11 @@ interface SavedSVG {
 
 type MyProps = {
   setAddLine: React.Dispatch<React.SetStateAction<boolean>>;
-  savedSVGs: SavedSVG[];
-  setSavedSVGs: React.Dispatch<React.SetStateAction<SavedSVG[]>>;
+  currentSVG: SavedSVG | null;
+  setCurrentSVG: React.Dispatch<React.SetStateAction<SavedSVG | null>>;
 };
 
-export default function AddLine({ setAddLine, savedSVGs, setSavedSVGs }: MyProps) {
+export default function AddLine({ setAddLine, currentSVG, setCurrentSVG }: MyProps) {
   const [points, setPoints] = useState<Point[]>([]);
   const [svgElements, setSvgElements] = useState<SVGElement[]>([]);
   const [showStyleEditor, setShowStyleEditor] = useState(false);
@@ -96,9 +96,10 @@ export default function AddLine({ setAddLine, savedSVGs, setSavedSVGs }: MyProps
   };
 
   useEffect(() => {
-    console.log(svgContent);
+    console.log("Current SVG:", currentSVG);
+    console.log("SVG Content:", svgContent);
     return () => {};
-  }, []);
+  }, [currentSVG, svgContent]);
 
   // Generate SVG content string from drawing elements only (no dots)
   const generateSvgContentString = (elements: SVGElement[]): string => {
@@ -166,9 +167,11 @@ export default function AddLine({ setAddLine, savedSVGs, setSavedSVGs }: MyProps
 
   const clearPoints = () => {
     setPoints([]);
+    // Also clear the current SVG
+    setCurrentSVG(null);
   };
 
-  // Save current SVG function
+  // Save current SVG function - replaces the previous SVG
   const saveSVG = () => {
     if (svgElements.length === 0) {
       console.log("No SVG content to save");
@@ -182,9 +185,9 @@ export default function AddLine({ setAddLine, savedSVGs, setSavedSVGs }: MyProps
       elements: [...svgElements]
     };
 
-    setSavedSVGs(prev => [...prev, newSavedSVG]);
-    console.log("SVG saved:", newSavedSVG);
-    console.log("All saved SVGs:", [...savedSVGs, newSavedSVG]);
+    // Replace the current SVG instead of adding to array
+    setCurrentSVG(newSavedSVG);
+    console.log("SVG saved (replacing previous):", newSavedSVG);
   };
 
   const renderSvgElement = (
@@ -491,6 +494,15 @@ export default function AddLine({ setAddLine, savedSVGs, setSavedSVGs }: MyProps
               </div>
             </div>
           </div>
+
+          {/* Current SVG Info */}
+          {currentSVG && (
+            <div style={{ marginTop: "16px", padding: "8px", background: "rgba(0, 0, 0, 0.1)", borderRadius: "6px" }}>
+              <div style={{ fontSize: "0.75rem", color: "#666" }}>
+                Current SVG: {currentSVG.id} (Created: {currentSVG.timestamp.toLocaleTimeString()})
+              </div>
+            </div>
+          )}
         </div>
       )}
 

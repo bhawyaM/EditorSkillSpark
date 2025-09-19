@@ -35,7 +35,7 @@ const EditorBox = ({
   currentSlide: number;
 }) => {
   const [visibleElements, setVisibleElements] = useState<string[]>([]);
-  const [savedSVGs, setSavedSVGs] = useState<SavedSVG[]>([]);
+  const [currentSVG, setCurrentSVG] = useState<SavedSVG | null>(null); // Single SVG instead of array
   const [selectedElementId, setSelectedElementId] = useState<
     string | number | null
   >(null);
@@ -43,8 +43,8 @@ const EditorBox = ({
   const [activeEditorBtn, setActiveEditorBtn] = useState<number | null>(null);
   const [addline, setAddLine] = useState<boolean>(false);
   
-  // Track processed SVGs to avoid duplicates
-  const processedSVGsRef = useRef<Set<string>>(new Set());
+  // Track if current SVG has been processed
+  const processedSVGRef = useRef<string | null>(null);
 
   // Function to convert SVG elements to SVG string
   const convertSVGElementsToSVGString = useCallback(
@@ -105,14 +105,15 @@ const EditorBox = ({
     (savedSVG: SavedSVG) => {
       const svgString = convertSVGElementsToSVGString(savedSVG.elements);
       const dataURL = svgToDataURL(svgString);
-console.log("Adding SVG to slide:", dataURL, svgString);
+      console.log("Adding SVG to slide:", dataURL, svgString);
+      
       const newImageElement = {
         id: `svg-img-${savedSVG.id}`,
         type: "image" as const,
         x: 50,
         y: 50,
-        width: 300, // Increased width
-        height: 200, // Reasonable height
+        width: 300,
+        height: 200,
         content: dataURL,
         src: dataURL,
         locked: false,
@@ -129,25 +130,25 @@ console.log("Adding SVG to slide:", dataURL, svgString);
     [convertSVGElementsToSVGString, svgToDataURL, currentSlide, setSlides]
   );
 
-  // Watch for changes in savedSVGs and add new ones to slide
+  // Watch for changes in currentSVG and add it to slide
   useEffect(() => {
-    if (savedSVGs.length > 0) {
-      const latestSVG = savedSVGs[savedSVGs.length - 1];
-      
-      // Check if this SVG has already been processed
-      if (!processedSVGsRef.current.has(latestSVG.id)) {
-        // Check if this SVG is already added to slide to avoid duplicates
-        const existingElement = slides[currentSlide]?.elements?.find(
-          (el: any) => el.id === `svg-img-${latestSVG.id}`
-        );
+    if (currentSVG && processedSVGRef.current !== currentSVG.id) {
+      // Check if this SVG is already added to slide to avoid duplicates
+      const existingElement = slides[currentSlide]?.elements?.find(
+        (el: any) => el.id === `svg-img-${currentSVG.id}`
+      );
 
-        if (!existingElement) {
-          addSVGToSlide(latestSVG);
-          processedSVGsRef.current.add(latestSVG.id);
-        }
+      if (!existingElement) {
+        addSVGToSlide(currentSVG);
+        processedSVGRef.current = currentSVG.id;
       }
     }
-  }, [savedSVGs, addSVGToSlide, currentSlide, slides]);
+  }, [currentSVG, slides]);
+
+  // Clear processed SVG when switching slides
+  useEffect(() => {
+    processedSVGRef.current = null;
+  }, [currentSlide]);
 
   // Optimize state updates with useCallback and debouncing
   const updateElement = useCallback(
@@ -589,8 +590,8 @@ console.log("Adding SVG to slide:", dataURL, svgString);
       {addline && (
         <div className="absolute top-2 right-2 z-10">
           <AddLine
-            savedSVGs={savedSVGs}
-            setSavedSVGs={setSavedSVGs}
+            currentSVG={currentSVG}
+            setCurrentSVG={setCurrentSVG}
             setAddLine={setAddLine}
           />
         </div>

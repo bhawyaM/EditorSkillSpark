@@ -18,6 +18,7 @@ import { type SlideConfig } from "../../assets/types/slidesData";
 import useDragable from "../../Hooks/useDragable";
 import IconGridInterface from "./IconGridInterface";
 import { AnimatePresence, motion } from "framer-motion";
+import { useClickOutside } from "../../Hooks/useClickOutside";
 
 const ToolBox = ({
   slides,
@@ -43,7 +44,7 @@ const ToolBox = ({
   const [hoveredButton, setHoveredButton] = useState<number | null>(null);
   const [iconBox, setIconBox] = useState<boolean>(false);
   const [iconShape, setIconShape] = useState<string>("");
-
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const handleImageBtnClick = (idx: number) => {
     setActiveEditorBtn(idx);
     if (fileInputRef.current) fileInputRef.current.click();
@@ -128,28 +129,37 @@ const ToolBox = ({
     }
   }, []);
 
-
+    useClickOutside({
+    ref: containerRef,
+    enabled: iconBox, 
+    bubbling: true,
+    onClickOutside: () => {
+      setIconBox(false);
+    
+      setActiveEditorBtn(null);
+    },
+  });
 
   const editorBox = [
     {
-      icon: <Type className="w-7 h-7" />,
+      icon: <Type className="w-6 h-6" />,
       hoverText: "Insert Text",
       function: () => addTextElement(),
     },
     {
-      icon: <SplinePointer className="w-7 h-7" />,
+      icon: <SplinePointer className="w-6 h-6" />,
       hoverText: "Insert Lines",
       function: () => setAddLine(true),
     },
     {
-      icon: <Shapes className="w-7 h-7" />,
+      icon: <Shapes className="w-6 h-6" />,
       hoverText: "Insert Icon",
       function: () => {
         setIconBox(true);
       },
     },
     {
-      icon: <ImageIcon className="w-7 h-7" />,
+      icon: <ImageIcon className="w-6 h-6" />,
       hoverText: "Insert Image",
       function: () => {
         if (fileInputRef.current) fileInputRef.current.click();
@@ -162,7 +172,7 @@ const ToolBox = ({
 <AnimatePresence>
   {iconBox && (
     <motion.div
-    
+    ref={containerRef}
       initial={{ opacity: 0, y: -20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: -20, scale: 0.95 }}
@@ -191,12 +201,12 @@ const ToolBox = ({
         style={{
           position: "absolute",
           alignItems: "center",
-          bottom: 30,
+          bottom:20,
           left: "50%",
           transform: "translateX(-50%)",
           display: "flex",
-          gap: "32px", // Increased gap from 20px to 32px
-          padding: "12px 20px", // Increased padding for better proportions
+          gap: "22px", // Increased gap from 20px to 32px
+          padding: "5px 20px", // Increased padding for better proportions
           background: "rgba(255, 255, 255, 0.4)",
           backdropFilter: "blur(10px) saturate(120%)",
           borderRadius: "12px", // Slightly increased border radius
@@ -212,7 +222,7 @@ const ToolBox = ({
             onMouseLeave={() => setHoveredButton(null)}
             style={{
               position: "relative",
-              padding: "12px", // Increased padding for larger clickable area
+              padding: "10px", // Increased padding for larger clickable area
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
