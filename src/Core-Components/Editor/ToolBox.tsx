@@ -19,6 +19,7 @@ import useDragable from "../../Hooks/useDragable";
 import IconGridInterface from "./IconGridInterface";
 import { AnimatePresence, motion } from "framer-motion";
 import { useClickOutside } from "../../Hooks/useClickOutside";
+import ZoomDropdown from "../../assets/ZoomIn";
 
 const ToolBox = ({
   slides,
@@ -118,6 +119,11 @@ const ToolBox = ({
   const handleButtonClick = (idx: number, buttonFunction: () => void,e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
+    if(activeEditorBtn === idx){
+      console.log("hello")
+      setActiveEditorBtn(null)
+      return
+    }
     setActiveEditorBtn(idx);
     buttonFunction();
   };
@@ -142,27 +148,34 @@ const ToolBox = ({
 
   const editorBox = [
     {
-      icon: <Type className="w-6 h-6" />,
+      icon: <Type className="w-[18px] h-[18px]" />,
       hoverText: "Insert Text",
       function: () => addTextElement(),
     },
     {
-      icon: <SplinePointer className="w-6 h-6" />,
+      icon: <SplinePointer className="w-[18px] h-[18px]" />,
       hoverText: "Insert Lines",
       function: () => setAddLine(true),
     },
     {
-      icon: <Shapes className="w-6 h-6" />,
+      icon: <Shapes className="w-[18px] h-[18px]" />,
       hoverText: "Insert Icon",
       function: () => {
         setIconBox(true);
       },
     },
     {
-      icon: <ImageIcon className="w-6 h-6" />,
+      icon: <ImageIcon className="w-[18px] h-[18px]" />,
       hoverText: "Insert Image",
       function: () => {
         if (fileInputRef.current) fileInputRef.current.click();
+      },
+    },
+    {
+      icon: <ZoomDropdown />,
+      hoverText: "Zoom In/Out",
+      function: () => {
+        
       },
     },
   ];
@@ -205,13 +218,13 @@ const ToolBox = ({
           left: "50%",
           transform: "translateX(-50%)",
           display: "flex",
-          gap: "22px", // Increased gap from 20px to 32px
-          padding: "5px 20px", // Increased padding for better proportions
+          gap: "22px", 
+          padding: "5px 20px", 
           background: "rgba(255, 255, 255, 0.4)",
           backdropFilter: "blur(10px) saturate(120%)",
-          borderRadius: "12px", // Slightly increased border radius
+          borderRadius: "8px", 
           boxShadow: "0 4px 20px rgba(0, 0, 0, 0.15)",
-          zIndex: 10,
+          zIndex: 1000,
         }}
       >
         {editorBox.map((btn, idx) => (
@@ -222,14 +235,14 @@ const ToolBox = ({
             onMouseLeave={() => setHoveredButton(null)}
             style={{
               position: "relative",
-              padding: "10px", // Increased padding for larger clickable area
+              padding: "8px", 
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               cursor: "pointer",
               background: activeEditorBtn === idx ? "#1e3a8a" : "transparent",
-              borderRadius: "8px", // Increased border radius
-              transition: "all 0.2s ease", // Added 'all' for smoother transitions
+              borderRadius: "8px", 
+              transition: "all 0.2s ease", 
               color: activeEditorBtn === idx ? "#fff" : "#374151",
               boxShadow: activeEditorBtn === idx ? "0 2px 8px rgba(30, 58, 138, 0.3)" : "none",
             }}
@@ -258,12 +271,12 @@ const ToolBox = ({
             <div
               style={{
                 position: "absolute",
-                top: -35, // Adjusted for better positioning
+                top: -35, 
                 left: "50%",
                 transform: "translateX(-50%)",
                 background: "#1e3a8a",
                 color: "white",
-                padding: "6px 10px", // Slightly increased padding
+                padding: "6px 10px", 
                 borderRadius: "6px",
                 fontSize: "0.75rem",
                 whiteSpace: "nowrap",
@@ -278,6 +291,7 @@ const ToolBox = ({
             </div>
           </div>
         ))}
+      
       </div>
 
       {/* Hidden file input for image uploads */}

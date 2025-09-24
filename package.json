@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@lexical/react": "^0.35.0",
+    "@lexical/rich-text": "^0.35.0",
     "@tailwindcss/vite": "^4.1.13",
     "framer-motion": "^12.23.13",
     "konva": "^10.0.2",
@@ -19,7 +20,9 @@
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-konva": "^19.0.10",
+    "react-sortablejs": "^6.1.4",
     "tailwindcss": "^4.1.13",
+    "use-debounce": "^10.0.6",
     "use-image": "^1.1.4"
   },
   "devDependencies": {

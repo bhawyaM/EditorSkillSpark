@@ -23,7 +23,7 @@ import {
   X,
 } from "lucide-react";
 import { i } from "framer-motion/client";
-import {useClickOutside} from "../../Hooks/useClickOutside";
+import { useClickOutside } from "../../Hooks/useClickOutside";
 
 type addElement = {
   functionAddIcon: (icon: string) => void;
@@ -38,12 +38,11 @@ export default function IconGridInterface({
   setIconShape,
   iconBox,
   setIconBox,
-  setActiveEditorBtn
+  setActiveEditorBtn,
 }: addElement) {
   const [searchTerm, setSearchTerm] = useState("");
   const [isVisible, setIsVisible] = useState(false);
   const [visibilityPercentage, setVisibilityPercentage] = useState(0);
-
 
   const icons = [
     { icon: Home, name: "Home" },
@@ -76,38 +75,24 @@ export default function IconGridInterface({
     setSearchTerm("");
   };
 
-  // Intersection Observer for visibility detection
-  // useEffect(() => {
-  //   function handleClickOutside(event: MouseEvent) {
-  //     // if click target is NOT inside the ref container
-  //     console.log("hello", iconBox);
-  //     event.stopPropagation();
-  //     event.preventDefault();
-  //     //@ts-ignore
-  //     if (
-  //       containerRef.current &&
-  //       !containerRef.current.contains(event.target as Node) && iconBox
-  //     ) {
-  //       setIconBox(false);
-  //       setActiveEditorBtn(null);
-  //     }
-  //   }
-
-  //   document.addEventListener("click", handleClickOutside);
-
-  //   return () => {
-  //     document.removeEventListener("click", handleClickOutside);
-  //   };
-  // }, []);
-
   return (
     <div
-      className={`max-w-md w-full mx-auto border border-gray-800 rounded-lg shadow-lg
+      className={`max-w-md relative w-full mx-auto border border-gray-800 rounded-lg shadow-lg
               backdrop-blur-lg backdrop-saturate-150 bg-white/40
               transition-all duration-300 ${
                 isVisible ? "scale-100" : "scale-95"
               }`}
     >
+      <button
+        onClick={() => setIconBox(false)}
+        className="absolute -top-1 -right-1 p-1 rounded-full bg-black/70 text-white 
+           shadow-[0_0_8px_2px_rgba(255,255,255,0.5)] 
+           hover:shadow-none hover:text-black hover:bg-white 
+           transition-all duration-300 hover:rotate-90 z-50"
+      >
+        <X className="w-5 h-5" />
+      </button>
+
       {/* Search Bar */}
       <div className="p-4 border-b border-gray-200">
         <div className="relative">
@@ -118,7 +103,7 @@ export default function IconGridInterface({
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full px-4 py-2 pr-10 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 placeholder-gray-400"
             style={{
-              background: "rgba(255, 255, 255, 0.9)", // Slightly transparent white for input
+              background: "rgba(255, 255, 255, 0.9)", 
             }}
           />
           {searchTerm && (

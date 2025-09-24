@@ -294,7 +294,7 @@ export default function AddLine({ setAddLine, currentSVG, setCurrentSVG }: MyPro
   return (
     <div
       onMouseDown={handleToolBox}
-      className="bg-transparent p-6 rounded-lg shadow-lg"
+      className="bg-transparent p-6 rounded-lg shadow-lg "
     >
       {/* Editor Toolbar */}
       <div
@@ -305,24 +305,23 @@ export default function AddLine({ setAddLine, currentSVG, setCurrentSVG }: MyPro
           left: "50%",
           transform: "translateX(-50%)",
           display: "flex",
-          gap: "32px",
-          padding: "12px 20px",
+          gap: "22px",
+          padding: "5px 20px",
           background: "rgba(255, 255, 255, 0.4)",
           backdropFilter: "blur(10px) saturate(120%)",
-          borderRadius: "12px",
+          borderRadius: "8px",
           boxShadow: "0 4px 20px rgba(0, 0, 0, 0.15)",
-          zIndex: 10,
         }}
       >
         {editorBox.map((btn, idx) => (
           <div
             key={idx}
-            onClick={(e) => handleButtonClick(idx, btn.function, e)}
+            onClick={(e) => {handleButtonClick(idx, btn.function, e); if(idx===2)setAddLine(false)}}
             onMouseEnter={() => setHoveredButton(idx)}
             onMouseLeave={() => setHoveredButton(null)}
             style={{
               position: "relative",
-              padding: "12px",
+              padding: "8px",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -346,9 +345,9 @@ export default function AddLine({ setAddLine, currentSVG, setCurrentSVG }: MyPro
               }}
             >
               {activeEditorBtn === idx ? (
-                <IconImport size={28} name={btn.icon} color="white" />
+                <IconImport size={18} name={btn.icon} color="white" />
               ) : (
-                <IconImport size={28} name={btn.icon} color="#374151" />
+                <IconImport size={18} name={btn.icon} color="#374151" />
               )}
               {idx === 1 ? (
                 <div
@@ -390,7 +389,6 @@ export default function AddLine({ setAddLine, currentSVG, setCurrentSVG }: MyPro
                 opacity: hoveredButton === idx ? 1 : 0,
                 visibility: hoveredButton === idx ? "visible" : "hidden",
                 transition: "opacity 0.2s ease, visibility 0.2s ease",
-                zIndex: 1000,
                 boxShadow: "0 2px 8px rgba(0, 0, 0, 0.2)",
               }}
             >
@@ -414,8 +412,7 @@ export default function AddLine({ setAddLine, currentSVG, setCurrentSVG }: MyPro
             backdropFilter: "blur(10px) saturate(120%)",
             borderRadius: "12px",
             boxShadow: "0 4px 20px rgba(0, 0, 0, 0.15)",
-            zIndex: 9,
-            minWidth: "400px",
+            minWidth: "400px"
           }}
         >
           <div
